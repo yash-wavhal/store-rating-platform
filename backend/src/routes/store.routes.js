@@ -7,24 +7,34 @@ const router = express.Router();
 router.get("/", auth, async (req, res) => {
   const { search, sort = "name", order = "asc" } = req.query;
 
-  let values = [];
-  let whereClause = "";
+  const values = [req.user.id];
+  let searchClause = "";
 
   if (search) {
     values.push(`%${search}%`);
-    whereClause = `
-      WHERE s.name ILIKE $1 OR s.address ILIKE $1
+    searchClause = `
+      AND (s.name ILIKE $2 OR s.address ILIKE $2)
     `;
   }
 
   const query = `
-    SELECT s.id, s.name, s.address,
-    COALESCE(AVG(r.rating),0) AS rating
+    SELECT
+      s.id,
+      s.name,
+      s.address,
+      COALESCE(ROUND(AVG(r.rating), 1), 0) AS average_rating,
+      ur.rating AS user_rating
     FROM stores s
-    LEFT JOIN ratings r ON s.id = r.store_id
-    ${whereClause}
-    GROUP BY s.id
-    ORDER BY ${sort === "rating" ? "rating" : "s.name"} ${order === "desc" ? "DESC" : "ASC"}
+    LEFT JOIN ratings r
+      ON s.id = r.store_id
+    LEFT JOIN ratings ur
+      ON s.id = ur.store_id AND ur.user_id = $1
+    WHERE 1 = 1
+    ${searchClause}
+    GROUP BY s.id, ur.rating
+    ORDER BY
+      ${sort === "rating" ? "average_rating" : "s.name"}
+      ${order === "desc" ? "DESC" : "ASC"}
   `;
 
   const result = await pool.query(query, values);

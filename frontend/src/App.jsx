@@ -3,12 +3,14 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserDashboard from "./pages/user/UserDashboard";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
-import AdminLayout from "./pages/admin/AdminLayout";
-import Users from "./pages/admin/users";
-import Stores from "./pages/admin/stores";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import api from "./services/api";
+import UpdatePassword from "./components/UpdatePassword";
+import Navbar from "./components/Navbar";
+import AdminLayout from "./components/admin/AdminLayout";
+import Users from "./pages/admin/users/users";
+import Stores from "./pages/admin/stores/stores";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -39,6 +41,8 @@ function App() {
 
   return (
     <BrowserRouter>
+      {user && <Navbar user={user} />}
+
       <Routes>
         <Route
           path="/login"
@@ -89,6 +93,13 @@ function App() {
           path="/owner/*"
           element={
             user?.role === "STORE_OWNER" ? <OwnerDashboard /> : <Navigate to="/" />
+          }
+        />
+
+        <Route
+          path="/update-password"
+          element={
+            <UpdatePassword />
           }
         />
 

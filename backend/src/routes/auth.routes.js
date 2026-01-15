@@ -78,15 +78,36 @@ router.post("/logout", (req, res) => {
   res.json({ message: "Logged out" });
 });
 
-router.put("/password", validatePasswordUpdate, async (req, res) => {
-  const hashed = await bcrypt.hash(req.body.password, 10);
+router.put("/password", validatePasswordUpdate, auth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
 
-  await pool.query(
-    "UPDATE users SET password=$1 WHERE id=$2",
-    [hashed, req.user.id]
+  // 1. Fetch existing password
+  const userRes = await pool.query(
+    "SELECT password FROM users WHERE id = $1",
+    [req.user.id]
   );
 
-  res.json({ message: "Password updated" });
+  if (userRes.rows.length === 0) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const hashedPassword = userRes.rows[0].password;
+
+  // 2. Verify current password
+  const isMatch = await bcrypt.compare(currentPassword, hashedPassword);
+  if (!isMatch) {
+    return res.status(400).json({ message: "Current password is incorrect" });
+  }
+
+  // 3. Hash & update new password
+  const newHashed = await bcrypt.hash(newPassword, 10);
+
+  await pool.query(
+    "UPDATE users SET password = $1 WHERE id = $2",
+    [newHashed, req.user.id]
+  );
+
+  res.json({ message: "Password updated successfully" });
 });
 
 export default router;

@@ -1,5 +1,5 @@
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const passwordRegex = /^(?=.*[A-Z])(?=.*[\W_]).{8,16}$/;
+const passwordRegex = /^(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
 
 export const validateSignup = (req, res, next) => {
   const { name, email, address, password } = req.body;
@@ -33,9 +33,9 @@ export const validateSignup = (req, res, next) => {
 };
 
 export const validatePasswordUpdate = (req, res, next) => {
-  const { password } = req.body;
+  const { currentPassword } = req.body;
 
-  if (!passwordRegex.test(password)) {
+  if (!passwordRegex.test(currentPassword)) {
     return res.status(400).json({
       message:
         "Password must be 8-16 characters, include one uppercase letter and one special character",

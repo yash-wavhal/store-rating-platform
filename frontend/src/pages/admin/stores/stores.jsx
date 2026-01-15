@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import api from "../../services/api";
+import api from "../../../services/api";
 
 export default function Stores() {
   const [stores, setStores] = useState([]);
   const [owners, setOwners] = useState([]);
 
-  // create store form
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -13,7 +12,6 @@ export default function Stores() {
     owner_id: "",
   });
 
-  // filter form
   const [filters, setFilters] = useState({
     name: "",
     email: "",
@@ -23,11 +21,10 @@ export default function Stores() {
 
   const [error, setError] = useState("");
 
-  // 🔹 fetch stores with filters
   const fetchStores = async () => {
     try {
       const res = await api.get("/admin/stores", {
-        params: filters, // 🔥 filters as query params
+        params: filters,
       });
       setStores(res.data);
     } catch (err) {
@@ -35,7 +32,6 @@ export default function Stores() {
     }
   };
 
-  // 🔹 fetch store owners
   const fetchOwners = async () => {
     try {
       const res = await api.get("/admin/users?role=STORE_OWNER");
@@ -50,7 +46,6 @@ export default function Stores() {
     fetchOwners();
   }, []);
 
-  // 🔹 create store
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -64,13 +59,11 @@ export default function Stores() {
     }
   };
 
-  // 🔹 apply filters
   const handleFilter = (e) => {
     e.preventDefault();
     fetchStores();
   };
 
-  // 🔹 clear filters
   const clearFilters = () => {
     setFilters({ name: "", email: "", address: "", owner_id: "" });
     fetchStores();
@@ -84,10 +77,9 @@ export default function Stores() {
         <p className="text-red-600 text-sm text-center mb-3">{error}</p>
       )}
 
-      {/* 🔍 FILTER STORES */}
       <form
         onSubmit={handleFilter}
-        className="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-3"
+        className="bg-white p-4 rounded shadow mb-6 flex gap-2 w-full"
       >
         <input
           placeholder="Filter by Name"
@@ -115,7 +107,7 @@ export default function Stores() {
           onChange={(e) =>
             setFilters({ ...filters, owner_id: e.target.value })
           }
-          className="border p-2"
+          className="border p-2 w-72"
         >
           <option value="">All Owners</option>
           {owners.map((o) => (
@@ -125,21 +117,20 @@ export default function Stores() {
           ))}
         </select>
 
-        <div className="flex gap-2 col-span-full">
-          <button className="bg-green-600 text-white px-4 py-2 rounded">
-            Search
+        <div className="flex gap-2 ml-4">
+          <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+            Apply
           </button>
           <button
             type="button"
             onClick={clearFilters}
-            className="bg-gray-500 text-white px-4 py-2 rounded"
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
           >
             Clear
           </button>
         </div>
       </form>
 
-      {/* ➕ CREATE STORE */}
       <form
         onSubmit={handleSubmit}
         className="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-3"
@@ -184,19 +175,18 @@ export default function Stores() {
           ))}
         </select>
 
-        <button className="bg-blue-600 text-white py-2 rounded col-span-full">
+        <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded col-span-full">
           Create Store
         </button>
       </form>
 
-      {/* 🏬 STORE LIST */}
       <table className="w-full bg-white rounded shadow">
         <thead className="bg-gray-200">
           <tr>
-            <th className="p-2">Name</th>
-            <th className="p-2">Email</th>
-            <th className="p-2">Address</th>
-            <th className="p-2">Rating</th>
+            <th className="p-2 text-left">Name</th>
+            <th className="p-2 text-left">Email</th>
+            <th className="p-2 text-left">Address</th>
+            <th className="p-2 text-center">Rating</th>
           </tr>
         </thead>
         <tbody>
@@ -205,7 +195,7 @@ export default function Stores() {
               <td className="p-2">{s.name}</td>
               <td className="p-2">{s.email}</td>
               <td className="p-2">{s.address}</td>
-              <td className="p-2">
+              <td className="p-2 text-center">
                 {s.rating ? Number(s.rating).toFixed(1) : "N/A"}
               </td>
             </tr>
